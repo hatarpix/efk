@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
@@ -50,10 +51,27 @@ services:
     hostname: '{{.Node.Hostname}}'
     ports:
       - "24224:24224"
+  nginx:
+    image: nginx:1.18-alpine
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.type==main
+   configs:
+     - source: nginx
+       target: /etc/nginx/conf.d/kibana.conf
+   ports:
+     - "80:80"
+
 volumes:
   data-es:
+
 configs:
   fluent-collector:
     file: ./fluent-collector.cfg
   fluent-bit:
     file: ./fluent-bit.cfg
+  nginx:
+    file: ./nginx.cfg
+
