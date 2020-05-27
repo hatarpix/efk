@@ -7,4 +7,5 @@ EFK stack for docker swarm
   - docker node ls
   - docker node update --label-add type=main {node_ID}
 4. Deploy 
+
    docker stack deploy --compose-file docker-compose.yml efk
