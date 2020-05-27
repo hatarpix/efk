@@ -1,0 +1,59 @@
+version: '3.8'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.type==main
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data-es:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.7.0
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.type==main
+    ports:
+      - "5601:5601"
+  fluent-collect:
+    image: fluent/fluent-bit:latest
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.type==main
+    configs:
+      - source: fluent-collector
+        target: /fluent-bit/etc/fluent-bit.conf
+    ports:
+      - "24223:24223"
+  fluent-bit:
+    image: fluent/fluent-bit:latest
+    deploy:
+      mode: global
+    configs:
+      - source: fluent-bit
+        target: /fluent-bit/etc/fluent-bit.conf
+    hostname: '{{.Node.Hostname}}'
+    ports:
+      - "24224:24224"
+volumes:
+  data-es:
+configs:
+  fluent-collector:
+    file: ./fluent-collector.cfg
+  fluent-bit:
+    file: ./fluent-bit.cfg
