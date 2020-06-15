@@ -8,18 +8,15 @@ services:
       placement:
         constraints:
           - node.labels.type==main
+      resources:
+        limits:
+          memory: 800M
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     volumes:
       - data-es:/usr/share/elasticsearch/data
-        #    ports:
-        #      - "9200:9200"
   kibana:
     image: docker.elastic.co/kibana/kibana:7.7.0
     deploy:
@@ -27,8 +24,6 @@ services:
       placement:
         constraints:
           - node.labels.type==main
-            #    ports:
-            #      - "5601:5601"
   fluent-collect:
     image: fluent/fluent-bit:latest
     deploy:
